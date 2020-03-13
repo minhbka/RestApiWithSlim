@@ -97,6 +97,14 @@
         }
 
 
+        public function deleteUser($id){
+            $stmt = $this->con->prepare("Delete from users where id = ?");
+            $stmt->bind_param("i", $id);
+            if($stmt->execute())
+                return true;
+            return false;
+        }
+
         public function getUserByEmail($email){
             $stmt = $this->con->prepare("Select  id, email, name, school from users where email = ?");
             $stmt->bind_param("s", $email);

@@ -188,13 +188,10 @@ $app->put('/updatepassword', function(Request $request, Response $response){
 		$result = $db->updatePassword($email, $currentpassword, $newpassword);
 
 		if($result == PASSWORD_CHANGED){
-			$user = $db->getUserByEmail($email);
+			
 			$message = array();
 			$message['error'] = false;
 			$message['message'] = 'password changed Successfully';
-			$message['user'] = $user;
-
-
 			$response->getBody()->write(json_encode($message));
 			return $response
 				->withHeader('Content-type', 'application/json')
@@ -226,6 +223,34 @@ $app->put('/updatepassword', function(Request $request, Response $response){
 		->withHeader('Content-type', 'application/json')
 		->withStatus(422);  
 });
+
+$app -> delete('/deleteuser/{id}', function(Request $request, Response $response, $args){
+	$id = $args['id'];
+	$db = new DbOperations;
+
+	if($db->deleteUser($id)){
+		$message = array();
+		$message['error'] = false;
+		$message['message'] = 'user has been deleted ';
+		$response->getBody()->write(json_encode($message));
+		return $response
+			->withHeader('Content-type', 'application/json')
+			->withStatus(200);
+	}
+	else{
+		$message = array();
+		$message['error'] =  true;
+		$message['message'] = 'Please try again later';
+		
+
+		$response->getBody()->write(json_encode($message));
+		return $response
+			->withHeader('Content-type', 'application/json')
+			->withStatus(404);
+	}
+
+});
+
 function haveEmptyParameters($require_params, $request, $response){
 	$error = false;
 	$error_params = '';
