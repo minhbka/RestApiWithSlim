@@ -5,8 +5,9 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$app = AppFactory::create();
 
+$app = AppFactory::create();
+$app->setBasePath("/MyApi/public");
 $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
     $name = $args['name'];
     $response->getBody()->write("Hello, $name");
