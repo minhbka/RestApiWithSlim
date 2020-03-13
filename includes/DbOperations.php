@@ -70,6 +70,33 @@
             return $users;
         }
 
+        public function updateUser($id, $email, $name, $school){
+            $stmt = $this->con->prepare("Update users Set email = ?, name = ?, school = ? where id = ?");
+            $stmt->bind_param("sssi", $email, $name, $school, $id );
+            if($stmt->execute()){
+                return true;
+            }
+            return false;
+
+        }
+
+        public function updatePassword($email, $currentPassword, $newPassword){
+            $hashed_password = $this->getUserPasswordByEmail($email);
+            if(password_verify($currentPassword, $hashed_password)){
+                $hash_password = password_hash($newPassword, PASSWORD_DEFAULT);
+                $stmt = $this->con->prepare("Update users set password = ? where email = ?");
+                $stmt-> bind_param("ss", $hash_password,$email);
+                if($stmt->execute()){
+                    return PASSWORD_CHANGED;
+                }
+                return PASSWORD_DO_NOT_CHANGED;
+            }
+            else{
+                return PASSWORD_DO_NOT_MATCH;
+            }
+        }
+
+
         public function getUserByEmail($email){
             $stmt = $this->con->prepare("Select  id, email, name, school from users where email = ?");
             $stmt->bind_param("s", $email);
