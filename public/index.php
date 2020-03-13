@@ -120,6 +120,21 @@ $app->post('/userlogin',function(Request $request, Response $response){
 
 });
 
+
+$app->get('/allusers', function(Request $request, Response $response){
+	$db = new DbOperations;
+	$users = $db->getAllUsers();
+	$message = array();
+	$message['error'] =  false;
+	$message['users'] = $users;
+	$response->getBody()->write(json_encode($message));
+	
+	return $response
+		->withHeader('Content-type', 'application/json')
+		->withStatus(200);
+
+});
+
 function haveEmptyParameters($require_params, $request, $response){
 	$error = false;
 	$error_params = '';
