@@ -20,7 +20,7 @@ $app->setBasePath("/MyApi/public");
  * parametter: email, password, name, school
  * method: POST
  */
-$app->post('/createuser',function(Request $request, Response $response){
+$app->post('/signup',function(Request $request, Response $response){
 	if(!haveEmptyParameters(array('email', 'password', 'name', 'school'),$request, $response)){
 		$request_data = $request->getParsedBody();
 	
@@ -34,9 +34,11 @@ $app->post('/createuser',function(Request $request, Response $response){
 		$db = new DbOperations;
 		$result = $db->createUser($email, $hash_password, $name, $school);
 		if($result == USER_CREATED){
+			$user = $db->getUserByEmail($email);
 			$message = array();
-			$message['error'] = false;
+			$message['isSuccessful'] = true;
 			$message['message'] = 'User created Successfully';
+			$message['user'] = $user;
 			$response->getBody()->write(json_encode($message));
 
 			return $response
@@ -45,7 +47,7 @@ $app->post('/createuser',function(Request $request, Response $response){
 		}
 		else if($result == USER_FAILURE){
 			$message = array();
-			$message['error'] = true;
+			$message['isSuccessful'] = false;
 			$message['message'] = 'Some error occurred';
 			$response->getBody()->write(json_encode($message));
 
@@ -55,7 +57,7 @@ $app->post('/createuser',function(Request $request, Response $response){
 		}
 		else if($result == USER_EXISTS){
 			$message = array();
-			$message['error'] = true;
+			$message['isSuccessful'] = false;
 			$message['message'] = 'User Already Exists';
 			$response->getBody()->write(json_encode($message));
 
@@ -70,7 +72,7 @@ $app->post('/createuser',function(Request $request, Response $response){
         ->withStatus(422);  
 });
 
-$app->post('/userlogin',function(Request $request, Response $response){
+$app->post('/login',function(Request $request, Response $response){
 	if(!haveEmptyParameters(array("email", "password"), $request, $response)){
 		$request_data = $request->getParsedBody();
 	
@@ -82,7 +84,7 @@ $app->post('/userlogin',function(Request $request, Response $response){
 		if($result == USER_AUTHENTICATED){
 			$user = $db->getUserByEmail($email);
 			$message = array();
-			$message['error'] =  false;
+			$message['isSuccessful'] =  true;
 			$message['message'] = 'Login successful';
 			$message['user'] = $user;
 
@@ -94,7 +96,7 @@ $app->post('/userlogin',function(Request $request, Response $response){
 		else if($result == USER_NOT_FOUND){
 			
 			$message = array();
-			$message['error'] =  true;
+			$message['isSuccessful'] =  false;
 			$message['message'] = 'User not exist';
 			
 
@@ -105,7 +107,7 @@ $app->post('/userlogin',function(Request $request, Response $response){
 		}
 		else if($result == USER_PASSWORD_DO_NOT_MATCH){
 			$message = array();
-			$message['error'] =  true;
+			$message['isSuccessful'] =  false;
 			$message['message'] = 'Invalid credential ';
 			
 
@@ -126,7 +128,7 @@ $app->get('/allusers', function(Request $request, Response $response){
 	$db = new DbOperations;
 	$users = $db->getAllUsers();
 	$message = array();
-	$message['error'] =  false;
+	$message['isSuccessful'] =  true;
 	$message['users'] = $users;
 	$response->getBody()->write(json_encode($message));
 
@@ -149,7 +151,7 @@ $app->put('/updateuser/{id}', function(Request $request, Response $response, arr
 		if($result){
 			$user = $db->getUserByEmail($email);
 			$message = array();
-			$message['error'] = false;
+			$message['isSuccessful'] = true;
 			$message['message'] = 'User updated Successfully';
 			$message['user'] = $user;
 
@@ -161,7 +163,7 @@ $app->put('/updateuser/{id}', function(Request $request, Response $response, arr
 		}
 		else{
 			$message = array();
-			$message['error'] = true;
+			$message['isSuccessful'] = false;
 			$message['message'] = 'Please try again latter';
 			$response->getBody()->write(json_encode($message));
 
@@ -190,7 +192,7 @@ $app->put('/updatepassword', function(Request $request, Response $response){
 		if($result == PASSWORD_CHANGED){
 			
 			$message = array();
-			$message['error'] = false;
+			$message['isSuccessful'] = true;
 			$message['message'] = 'password changed Successfully';
 			$response->getBody()->write(json_encode($message));
 			return $response
@@ -199,7 +201,7 @@ $app->put('/updatepassword', function(Request $request, Response $response){
 		}
 		else if($result == PASSWORD_NOT_CHANGED){
 			$message = array();
-			$message['error'] = true;
+			$message['isSuccessful'] = false;
 			$message['message'] = 'Some errors orrcured, Please try again latter';
 			$response->getBody()->write(json_encode($message));
 
@@ -209,7 +211,7 @@ $app->put('/updatepassword', function(Request $request, Response $response){
 		}
 		else if($result == PASSWORD_DO_NOT_MATCH){
 			$message = array();
-			$message['error'] =  true;
+			$message['isSuccessful'] =  false;
 			$message['message'] = 'Password do not matched';
 			
 
@@ -230,7 +232,7 @@ $app -> delete('/deleteuser/{id}', function(Request $request, Response $response
 
 	if($db->deleteUser($id)){
 		$message = array();
-		$message['error'] = false;
+		$message['isSuccessful'] = true;
 		$message['message'] = 'user has been deleted ';
 		$response->getBody()->write(json_encode($message));
 		return $response
@@ -239,7 +241,7 @@ $app -> delete('/deleteuser/{id}', function(Request $request, Response $response
 	}
 	else{
 		$message = array();
-		$message['error'] =  true;
+		$message['isSuccessful'] =  false;
 		$message['message'] = 'Please try again later';
 		
 
@@ -253,9 +255,9 @@ $app -> delete('/deleteuser/{id}', function(Request $request, Response $response
 
 $app -> get('/quotes', function(Request $request, Response $response){
 	$db = new DbOperations;
-	$users = $db->getAllQuotes();
+	$quotes = $db->getAllQuotes();
 	$message = array();
-	$message['error'] =  false;
+	$message['isSuccessful'] =  true;
 	$message['quotes'] = $quotes;
 	$response->getBody()->write(json_encode($message));
 
@@ -279,7 +281,7 @@ function haveEmptyParameters($require_params, $request, $response){
 	if($error){
 		
 		$error_detail = array();
-		$error_detail['error'] = true;
+		$error_detail['isSuccessful'] = false;
 		$error_detail['message'] = 'Required parameters ' . substr($error_params, 0, -2) . ' are missing or empty';
 		$response->getBody()->write(json_encode($error_detail));
 	}
