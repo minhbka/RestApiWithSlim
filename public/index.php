@@ -251,6 +251,19 @@ $app -> delete('/deleteuser/{id}', function(Request $request, Response $response
 
 });
 
+$app -> get('/quotes', function(Request $request, Response $response){
+	$db = new DbOperations;
+	$users = $db->getAllQuotes();
+	$message = array();
+	$message['error'] =  false;
+	$message['quotes'] = $quotes;
+	$response->getBody()->write(json_encode($message));
+
+	return $response
+		->withHeader('Content-type', 'application/json')
+		->withStatus(200);
+});
+
 function haveEmptyParameters($require_params, $request, $response){
 	$error = false;
 	$error_params = '';

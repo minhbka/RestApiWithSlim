@@ -127,4 +127,25 @@
             $stmt->store_result();
             return $stmt->num_rows > 0;
         }
+
+        public function getAllQuotes(){
+            $stmt = $this->con->prepare("Select * From quotes");
+            
+            $stmt->execute();
+            $stmt->bind_result($id, $author, $quote_text, $thumbnail, $created_at, $updated_at);
+            $quotes = array();
+            while($stmt->fetch()){
+                $quote = array(
+                    "id" => $id,
+                    "author" => $author,
+                    "thumbnail" => $thumbnail,
+                    "quote" => $quote_text, 
+                    "created_at" => $created_at,
+                    "updated_at" => $updated_at
+                );
+                array_push($quotes, $quote);
+            }
+            
+            return $quotes;
+        }
     }
