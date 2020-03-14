@@ -266,6 +266,19 @@ $app -> get('/quotes', function(Request $request, Response $response){
 		->withStatus(200);
 });
 
+$app -> get('/movies', function(Request $request, Response $response){
+	$db = new DbOperations;
+	$movies = $db->getAllMovies();
+	$message = array();
+	$message['isSuccessful'] =  true;
+	$message['movies'] = $movies;
+	$response->getBody()->write(json_encode($message));
+
+	return $response
+		->withHeader('Content-type', 'application/json')
+		->withStatus(200);
+});
+
 function haveEmptyParameters($require_params, $request, $response){
 	$error = false;
 	$error_params = '';

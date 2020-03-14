@@ -148,4 +148,28 @@
             
             return $quotes;
         }
+
+        public function getAllMovies(){
+            $stmt = $this->con->prepare("Select * From movies");
+            
+            $stmt->execute();
+            $stmt->bind_result($id, $language, $title, $image, $type, $rating, $is_new, $like_percent, $vote_count);
+            $movies = array();
+            while($stmt->fetch()){
+                $movie = array(
+                    "id" => $id,
+                    "image" => $image,
+                    "title" => $title,
+                    "is_new" => $is_new, 
+                    "language" => $language,
+                    "like_percent" => $like_percent,
+                    "ratting" => $rating,
+                    "vote_count" => $vote_count,
+                    "type" => $type
+                );
+                array_push($movies, $movie);
+            }
+            
+            return $movies;
+        }
     }
